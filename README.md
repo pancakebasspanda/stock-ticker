@@ -216,7 +216,7 @@ Some examples here include optimizing parameters in functions<br />
 * Internal rate limiting given we have too many requests and resources are limited
 * Horizontal pod auto-scalar based on traffic
 
-```
+`
 ## Packages
 
 `/.kube`: kubernetes manifests that include secrets, config-maps, namespace and deployments

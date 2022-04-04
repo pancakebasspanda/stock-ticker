@@ -3,21 +3,21 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/justinas/alice"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/hlog"
 	"net/http"
 	"os"
 	"os/signal"
-	"stock_ticker/storage"
 	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/justinas/alice"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 
 	"stock_ticker/api"
 	"stock_ticker/server"
+	"stock_ticker/storage"
 )
 
 const (
@@ -58,13 +58,12 @@ func main() {
 
 	redisClient, err := storage.New(redisURL, redisPWD)
 	if err != nil {
-		log.Error().Err(err).Msg(_errRedisClient)
+		log.Panic().Err(err).Msg(_errRedisClient)
 	}
-
-	// store full full-length time series of 20+ years in case of rate-limits and NDAYS > 100
 
 	handler := server.NewHandler(apiClient, redisClient, nDays)
 
+	// store full full-length time series of 20+ years in case of rate-limits and NDAYS > 100
 	if err = handler.CacheData(ctx); err != nil {
 		log.Error().Err(err).Msg("cache data")
 	}

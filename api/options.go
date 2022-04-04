@@ -13,7 +13,7 @@ type options struct {
 	apiKey     string
 }
 
-// WithSymbol sets symbol in get request
+// WithKey sets symbol in get request
 func WithKey(s string) Option {
 	return func(a API) {
 		a.(*Client).options.apiKey = s

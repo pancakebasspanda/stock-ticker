@@ -13,9 +13,9 @@ The above API has the following limitations
 * 500 requests per day
 
 In order to cater for the above limits the app connects to and stores the raw api data redis cache and specifically uses the redis module [RedisJSON](https://redis.io/docs/stack/json/)
-The choice of RedisJSON was due to it being quick and easy to implement given the time constraint plus the quickness of looking up data.
+. The choice of RedisJSON was due to it being quick and easy to implement given the time constraint plus the quickness of looking up data.
 
-When the application first starts up it does a call to retrieve the FULL STOCK PRICE history of specific stock(20 Years). This is then cached in
+When the application first starts up, it does a call to retrieve the FULL STOCK PRICE history of specific stock(20 Years). This is then cached in
 redis. Thereafter, when a request comes in to retrieve NDAYS worth of data it first looks up dates in the cache and if that fails it will then call the API therefore not using
 up API quota on each request. 
 
@@ -27,7 +27,30 @@ A kubernetes [config map](https://kubernetes.io/docs/concepts/configuration/conf
 **Assumptions** <br />
 * Using a vanilla kubernetes environment
 * The config and the app runs for specific stock. If more stocks are required we can have different deployments reading the config map and being a specific deployment per stock or being a multi deployments and 
-caching data for all stocks
+caching data for all stock
+* Running one instance of redis as we are not managing aa connection pool, and we want high availability
+
+
+**Local Machine Run using Docker containers** <br />
+In order to run the stock-ticker service, you first need to run the docker containers
+running redis.  This is achieved by running the docker-compose.yaml file as follows
+
+```shell
+$ docker-compose up
+
+ - Container stock-ticker-redis-1         Running                                                                                                                                  0.0s 
+ - Container stock-ticker-stock-ticker-1  Created                                                                                                                                  0.4s 
+Attaching to stock-ticker-redis-1, stock-ticker-stock-ticker-1
+stock-ticker-stock-ticker-1  | 2022/04/04 23:04:08 [DEBUG] GET https://www.alphavantage.co/query?apikey=C227WD9W3LUVKVV9&function=TIME_SERIES_DAILY&symbol=MSFT&datatype=json&outputsize
+=full
+stock-ticker-redis-1         | 1:M 04 Apr 2022 23:04:10.262 * 1 changes in 3600 seconds. Saving...
+stock-ticker-redis-1         | 1:M 04 Apr 2022 23:04:10.262 * Background saving started by pid 21
+stock-ticker-redis-1         | 21:C 04 Apr 2022 23:04:10.288 * DB saved on disk
+stock-ticker-redis-1         | 21:C 04 Apr 2022 23:04:10.289 * RDB: 1 MB of memory used by copy-on-write
+stock-ticker-redis-1         | 1:M 04 Apr 2022 23:04:10.362 * Background saving terminated with success
+stock-ticker-stock-ticker-1  | {"level":"info","app":"stock-ticker","time":"2022-04-04T23:04:11Z","message":"staring server"}
+
+```
 
 
 ```shell
@@ -171,14 +194,27 @@ wget -O response.json http://localhost:8080/
 }
 ```
 
-## Upcoming Changes and Features
-***Submit method in the Bank simulator*** <br />
-Once all transactions are authorized, at the end of the day we should submit all of them to find out if they had been
-paid/completed. Some work has been done for this in  the bank package already.<br /><br />
-***Clean up code in regard to TODO's left in the codebase, plus increase test code coverage*** <br />
-Some examples here include optimizing parameters in functions, adding concurrency as to calling methods in the bank
-simulator and saving to the database
+## Running tests
+First we need to start our docker test database in which the tests interact with.
+```shell
+docker-compose up redis 
+```
+Then you can run all tests with
+```shell
+go test $(go list ./... | grep -v /vendor/ | grep -v /cmd/) -race
+```
 
+## Upcoming Changes and Features
+***Add concurrency***
+When getting the cache that should be in a goroutine as to not block the starting up of the service. This would include adding a readiness probe.
+***Health and freshness check on stocks API***
+***Clean up model package and separation between API model and server model***
+***Clean up code in regard to TODO's left in the codebase*** <br />
+Some examples here include optimizing parameters in functions
+***Reliability concerns***
+* Scaling this service requires additional config to run for all types of stocks
+* Internal rate limiting given we have too many requests and resources are limited
+* Horizontal pod auto-scalar based on traffic
 
 ## Running tests
 First we need to start our docker test database in which the tests interact with.
@@ -191,9 +227,9 @@ go test $(go list ./... | grep -v /vendor/ | grep -v /cmd/) -race
 ```
 ## Packages
 
-`/.kube`: kubenetes manifests that include secrets, config-maps, namespace and deployments
+`/.kube`: kubernetes manifests that include secrets, config-maps, namespace and deployments
 
-`/cmd`: main.go + setup files directly related to logging and reading ENV variables
+`/cmd`: main.go + setup directly related to logging and reading ENV variables
 
 `/server`: http server implementation
 

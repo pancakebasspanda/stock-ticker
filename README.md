@@ -205,25 +205,17 @@ go test $(go list ./... | grep -v /vendor/ | grep -v /cmd/) -race
 ```
 
 ## Upcoming Changes and Features
-***Add concurrency***<br />
+* ***Add concurrency***<br />
 When getting the cache that should be in a goroutine as to not block the starting up of the service. This would include adding a readiness probe.<br />
-***Health and freshness check on stocks API***<br />
-***Clean up model package and separation between API model and server model***<br />
-***Clean up code in regard to TODO's left in the codebase*** <br />
+* ***Health and freshness check on stocks API***<br />
+* ***Clean up model package and separation between API model and server model***<br />
+* ***Clean up code in regard to TODO's left in the codebase*** <br />
 Some examples here include optimizing parameters in functions<br />
-***Reliability concerns***<br />
+* ***Reliability concerns***<br />
 * Scaling this service requires additional config to run for all types of stocks
 * Internal rate limiting given we have too many requests and resources are limited
 * Horizontal pod auto-scalar based on traffic
 
-## Running tests
-First we need to start our docker test database in which the tests interact with.
-```shell
-docker-compose up redis 
-```
-Then you can run all tests with
-```shell
-go test $(go list ./... | grep -v /vendor/ | grep -v /cmd/) -race
 ```
 ## Packages
 

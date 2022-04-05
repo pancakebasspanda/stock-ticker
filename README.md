@@ -229,5 +229,5 @@ Some examples here include optimizing parameters in functions<br />
 
 `/storage`: Storage interface (we used redis in this instance as the implementation)
 
-`/integration-tests`: tests that directly test the storage implementation against a test redis db
+`/integration-test`: tests that directly test the storage implementation against a test redis db
 

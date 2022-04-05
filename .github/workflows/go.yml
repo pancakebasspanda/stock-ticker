@@ -25,4 +25,4 @@ jobs:
       run: go vet $(go list ./... | grep -v '/vendor/') | awk '{print "Please run go vet"; exit 1 }'
 
     - name: test
-      run:  go test $(go list ./... | grep -v /integration-test/) -race
+      run:  go test $(go list ./... | grep -v '/integration-test/') -race

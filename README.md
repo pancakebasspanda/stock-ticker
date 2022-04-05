@@ -1,6 +1,6 @@
 # Stock Ticker
 
-**About** <br />
+## About
 Stock Ticker is a web service that looks up a fixed number of closing prices of a specific stock.
 For a given GET request the web service should return the last NDAYS of data along with the average closing price over those days.
 
@@ -24,14 +24,14 @@ zerolog with http.Handler for some request context fields.  In order to do this 
 
 A kubernetes [config map](https://kubernetes.io/docs/concepts/configuration/configmap/) was used to pass in all environment variables and a [kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) was used to pass in the 
 
-**Assumptions** <br />
+## Assumptions
 * Using a vanilla kubernetes environment
 * The config and the app runs for specific stock. If more stocks are required we can have different deployments reading the config map and being a specific deployment per stock or being a multi deployments and 
 caching data for all stock
-* Running one instance of redis as we are not managing aa connection pool, and we want high availability
+* Running one instance of redis as we are not managing a connection pool, and we want high availability
 
 
-**Local Machine Run using Docker containers** <br />
+## Local Machine Run using Docker containers
 In order to run the stock-ticker service, you first need to run the docker containers
 running redis.  This is achieved by running the docker-compose.yaml file as follows
 
@@ -51,7 +51,7 @@ stock-ticker-redis-1         | 1:M 04 Apr 2022 23:04:10.362 * Background saving 
 stock-ticker-stock-ticker-1  | {"level":"info","app":"stock-ticker","time":"2022-04-04T23:04:11Z","message":"staring server"}
 
 ```
-
+## Production Kubernetes enivironment or minikube
 
 ```shell
 

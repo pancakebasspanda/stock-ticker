@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"stock_ticker/api"
 	"stock_ticker/storage"
+	"strconv"
 	"testing"
 )
 
@@ -132,7 +133,7 @@ func TestRedis_GetPriceInfo(t *testing.T) {
 		err      string
 	}{
 		{
-			name: "Successfully get price info for the past NDAYS",
+			name: "Successfully get price info for specific days",
 			rh:   reJsonHandler,
 			days: 3,
 			prices: []*api.DailyPrice{
@@ -192,16 +193,23 @@ func TestRedis_GetPriceInfo(t *testing.T) {
 				}
 			}
 
-			prices, avgClose, err := r.GetPriceInfo(tt.days)
-			if err != nil {
-				assert.Equal(t, err.Error(), tt.err)
+			var totClose float64
+			for _, price := range tt.prices {
+				res := getSpecificPrice(t, r.Rh, price.Day)
+				closePrice, err := strconv.ParseFloat(res.Close, 64)
 
-				return
+				if err != nil {
+					log.Error().Err(err).Str("close price", res.Close)
+					t.FailNow()
+				}
+
+				totClose += closePrice
+
+				assert.Equal(t, price.Price, res)
 			}
 
-			assert.Equal(t, tt.avgClose, avgClose)
+			assert.Equal(t, tt.avgClose, api.FixedPrecision(totClose/float64(len(tt.prices)), 2))
 
-			assert.Equal(t, tt.prices, prices)
 		})
 	}
 }
